@@ -25,7 +25,7 @@
         /// дата окончания испытательного срока. Выставляется после приема на работу
         /// </summary>
         public DateTime? ProbationaryPeriodEndDate {  get; set; }
-        public int VacancyId { get; set; }
-        public Vacancy Vacancy { get; set; }
+        public int? VacancyId { get; set; }
+        public Vacancy? Vacancy { get; set; }
     }
 }
