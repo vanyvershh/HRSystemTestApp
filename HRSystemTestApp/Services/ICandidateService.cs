@@ -15,23 +15,13 @@ namespace HRSystemTestApp.Services
     public class CandidateService : ICandidateService
     {
         private readonly ApplicationDbContext _context;
+        public CandidateService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
         public async Task<IEnumerable<Candidate>> GetAllAsync()
         {
-            return Enumerable.Range(1, 5).Select(index => new Candidate
-            {
-                Id = index,
-                Name = $"Name {index}",
-                Email = $"Email {index}",
-                PhoneNumber = $"PhoneNumber {index}",
-                CVLink = $"CVLink {index}",
-                RecruitmentStage = $"RecruitmentStage {index}",
-                ApplicationDate = DateTime.Now,
-                ProbationaryPeriodEndDate = DateTime.Now
-
-
-            });
-            //return await _context.Candidates.ToListAsync();
-
+            return await _context.Candidates.ToListAsync();
         }
         public async Task<Candidate> GetByIdAsync(int id)
         {
@@ -46,6 +36,17 @@ namespace HRSystemTestApp.Services
         }
         public async Task CreateAsync(Candidate candidate)
         {
+            //_context.Candidates.Add(new Candidate
+            //{
+            //    Id = 1,
+            //    Name = $"Name {1}",
+            //    Email = $"Email {1}",
+            //    PhoneNumber = $"PhoneNumber {1}",
+            //    CVLink = $"CVLink {1}",
+            //    RecruitmentStage = $"RecruitmentStage {1}",
+            //    ApplicationDate = DateTime.Now,
+            //    ProbationaryPeriodEndDate = DateTime.Now
+            //});
             _context.Candidates.Add(candidate);
             await _context.SaveChangesAsync();
         }

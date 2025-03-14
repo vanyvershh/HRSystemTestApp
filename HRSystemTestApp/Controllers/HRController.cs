@@ -1,4 +1,5 @@
 ﻿using HRSystemTestApp.Models;
+using HRSystemTestApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,93 +9,42 @@ namespace HRSystemTestApp.Controllers
     [ApiController]
     public class HRController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IHRService _hrService;
 
-        public HRController(ApplicationDbContext context)
+        public HRController(IHRService hrService)
         {
-            _context = context;
+            _hrService = hrService;
         }
 
-        // GET: api/HRs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HR>>> GetHRs()
+        public async Task<IEnumerable<HR>> GetHRs()
         {
-            return await _context.HRs.ToListAsync();
+            return await _hrService.GetAllAsync();
         }
 
-        // GET: api/HRs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<HR>> GetHR(int id)
         {
-            var hr = await _context.HRs.FindAsync(id);
-
-            if (hr == null)
-            {
-                return NotFound();
-            }
-
-            return hr;
+            return await _hrService.GetByIdAsync(id);
         }
 
-        // PUT: api/HRs/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutHR(int id, HR hr)
+        public async Task PutHR(int id, HR candidate)
         {
-            if (id != hr.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(hr).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!HRExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            await _hrService.UpdateAsync(candidate);
         }
 
-        // POST: api/HRs
         [HttpPost]
-        public async Task<ActionResult<HR>> PostHR(HR hr)
+        public async Task PostHR(HR candidate)
         {
-            _context.HRs.Add(hr);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetHR", new { id = hr.Id }, hr);
+            await _hrService.CreateAsync(candidate);
         }
 
-        // DELETE: api/HRs/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHR(int id)
         {
-            var hr = await _context.HRs.FindAsync(id);
-            if (hr == null)
-            {
-                return NotFound();
-            }
-
-            _context.HRs.Remove(hr);
-            await _context.SaveChangesAsync();
-
+            await _hrService.DeleteAsync(id);
             return NoContent();
-        }
-
-        private bool HRExists(int id)
-        {
-            return _context.HRs.Any(e => e.Id == id);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HRSystemTestApp.Models;
+using HRSystemTestApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,88 +9,42 @@ namespace HRSystemTestApp.Controllers
     [ApiController]
     public class VacancyController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IVacancyService _vacancyService;
 
-        public VacancyController(ApplicationDbContext context)
+        public VacancyController(IVacancyService vacancyService)
         {
-            _context = context;
+            _vacancyService = vacancyService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vacancy>>> GetVacancies()
+        public async Task<IEnumerable<Vacancy>> GetVacancies()
         {
-            return await _context.Vacancies.ToListAsync();
+            return await _vacancyService.GetAllAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Vacancy>> GetVacancy(int id)
         {
-            var vacancy = await _context.Vacancies.FindAsync(id);
-
-            if (vacancy == null)
-            {
-                return NotFound();
-            }
-
-            return vacancy;
+            return await _vacancyService.GetByIdAsync(id);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVacancy(int id, Vacancy vacancy)
+        public async Task PutVacancy(int id, Vacancy vacancy)
         {
-            if (id != vacancy.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(vacancy).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!VacancyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            await _vacancyService.UpdateAsync(vacancy);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Vacancy>> PostVacancy(Vacancy vacancy)
+        public async Task PostVacancy(Vacancy vacancy)
         {
-            _context.Vacancies.Add(vacancy);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetVacancy", new { id = vacancy.Id }, vacancy);
+            await _vacancyService.CreateAsync(vacancy);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVacancy(int id)
         {
-            var vacancy = await _context.Vacancies.FindAsync(id);
-            if (vacancy == null)
-            {
-                return NotFound();
-            }
-
-            _context.Vacancies.Remove(vacancy);
-            await _context.SaveChangesAsync();
-
+            await _vacancyService.DeleteAsync(id);
             return NoContent();
-        }
-
-        private bool VacancyExists(int id)
-        {
-            return _context.Vacancies.Any(e => e.Id == id);
         }
     }
 }
